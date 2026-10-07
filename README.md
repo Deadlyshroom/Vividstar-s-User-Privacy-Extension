@@ -11,7 +11,7 @@
 
 
 
-- **Clean links** (Privacy tab and popup): one setting that removes tracking tags (`utm_*`, `fbclid`, `gclid`, `si=` …) from addresses you open and skips click-logging / "you are leaving this site" redirect pages (Google, Facebook, Instagram, YouTube, Steam, Reddit, LinkedIn, Slack, VK, DuckDuckGo, Outlook Safe Links, Tumblr). Replaces the former separate "Skip tracking redirects" and "Strip tracking parameters" options.
+
 
 ## Fix: endless "Verify you are human" loop
 - A bot check compares the claimed browser with the real engine, so a Chrome/Safari identity on Firefox loops forever. When a site shows the check, the tab is reloaded once and from then on that site gets a Firefox identity (User-Agent switching stays on, same engine so it passes) and no fingerprint tweaks. The check's own frames are never touched. It only reads response headers; it does not contact any Cloudflare service. Other sites are unaffected.
