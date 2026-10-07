@@ -1,0 +1,61 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Vivid User Privacy</title>
+<link rel="stylesheet" href="style.css"><style>body{width:410px}.tgl{margin:5px 0;font-weight:400}</style></head><body>
+<div class="top"><h1>Vivid User Privacy</h1><label class="chk" style="margin:0"><input id="enabled" type="checkbox"> UA switching</label></div>
+
+<div id="autoBanner" class="state off">
+  <span class="dot"></span>
+  <div class="st-text"><b id="autoTitle">Auto rotation</b><div id="autoSub" class="st-sub"></div></div>
+</div>
+
+<div class="card">
+  <div class="mut">Current site: <b id="host">—</b></div>
+  <div style="margin-top:6px"><span class="badge" id="detected">—</span></div>
+  <div id="effective" class="mono" style="margin-top:6px"></div>
+</div>
+
+<div class="card" id="realCard">
+  <h2>Your real browser</h2>
+  <div><span class="badge alt" id="realBadge">detecting…</span></div>
+  <div id="realDetail" class="mut" style="margin-top:4px"></div>
+  <div class="row"><button id="runCheck">Check what sites detect on this tab</button></div>
+  <div id="report"></div>
+</div>
+
+<label>Profile</label>
+<div class="row"><select id="profile"></select><button id="generate" class="fit" title="Optional: generate a different real-world User-Agent for this profile each press">Generate</button></div>
+<textarea id="ua" placeholder="Pick a profile (fills this in), press Generate for another, or paste any custom User-Agent"></textarea>
+<div id="osHint" class="note" hidden></div>
+<div class="row"><button id="applyAll" class="primary">Apply to all sites</button><button id="applySite">Apply to this site</button></div>
+<div class="row"><button id="defaultSite" title="Do not spoof this site even if a global UA is set">Firefox default here</button><button id="clearSite">Remove site rule</button><button id="clearAll" class="danger">Reset all</button></div>
+<label class="chk" style="font-weight:400"><input id="reload" type="checkbox"> Reload tab after applying</label>
+
+<div class="card">
+  <h2>Automatic rotation</h2>
+  <div class="row"><select id="autoProfile"></select></div>
+  <div class="row"><span class="fit">Every</span><input id="seconds" type="number" min="60" step="1"><span class="fit">sec</span></div>
+  <div class="row"><button id="startAuto" class="primary">Start</button><button id="stopAuto">Stop</button><button id="rotateNow">Rotate now</button></div>
+  <div id="autoStatus" class="mut"></div>
+</div>
+
+<div class="card">
+  <h2>Privacy</h2>
+  <div class="row"><select id="level"><option value="off">Level: Off</option><option value="balanced">Level: Balanced</option><option value="strict">Level: Strict</option><option value="custom" disabled>Level: Custom</option></select></div>
+  <label class="chk tgl"><input id="qStrip" type="checkbox"> Clean links (remove tracking, skip redirects)</label>
+  <label class="chk tgl"><input id="qDnt" type="checkbox"> Send Do-Not-Track &amp; Global Privacy Control</label>
+  <label class="chk tgl"><input id="qRef" type="checkbox"> Trim referrer to site address only</label>
+  <label class="chk tgl"><input id="qWebrtc" type="checkbox"> Block WebRTC IP leaks</label>
+  <label class="chk tgl"><input id="qCanvas" type="checkbox"> Canvas fingerprint noise</label>
+  <div class="row"><button id="exemptSite" title="Skip all privacy tweaks on this site (use if the site breaks)">Skip privacy tweaks on this site</button></div>
+</div>
+
+<div class="card">
+  <h2>Hide my IP</h2>
+  <label class="chk tgl"><input id="proxyEnabled" type="checkbox"> Route traffic through a proxy</label>
+  <div class="row"><select id="proxySel"></select></div>
+  <div class="row"><button id="checkIp">Check my IP</button><button id="rotateProxy">New proxy</button></div>
+  <div id="ipOut" class="mono"></div>
+  <div id="proxyStatus" class="mut"></div>
+</div>
+
+<div class="row"><button id="options">Settings, site rules &amp; proxies</button></div>
+<script src="ua-lib.js"></script><script src="popup.js"></script></body></html>

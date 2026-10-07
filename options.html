@@ -1,0 +1,350 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Vivid User Privacy Settings</title>
+<link rel="stylesheet" href="style.css">
+<style>body{max-width:900px;margin:30px auto;font-size:14px}.rule{display:grid;grid-template-columns:1.2fr 1fr 2fr auto;gap:7px;margin:7px 0}</style></head><body>
+<h1 style="font-size:24px;margin-bottom:14px">Vivid User Privacy Settings</h1>
+
+<div class="tabs">
+  <button class="tab active" data-tab="ua">User-Agent</button>
+  <button class="tab" data-tab="privacy">Privacy</button>
+  <button class="tab" data-tab="spoof">Spoofing</button>
+  <button class="tab" data-tab="ip">IP &amp; Proxy</button>
+  <button class="tab" data-tab="check">Browser check</button>
+  <button class="tab" data-tab="backup">Backup</button>
+</div>
+
+<!-- ======================= USER-AGENT ======================= -->
+<div class="pane" id="pane-ua">
+<section class="card"><h2>General</h2>
+  <label class="chk"><input data-key="enabled" type="checkbox"><span>Enable User-Agent switching</span></label>
+  <label>Global User-Agent (blank = Firefox default)</label>
+  <div class="row"><select id="gprofile"></select><button id="ggen" class="fit" title="Optional: generate a different real-world User-Agent for this profile each press">Generate</button></div>
+  <textarea data-key="globalUA"></textarea>
+  <p class="mut">Applies to every site without its own rule. Setting a global UA is ignored while automatic rotation is on.</p>
+  <div class="note good"><b>Always up to date.</b> On startup, when your connection returns, and at least hourly, this add-on pulls the newest Chrome, Edge and Firefox versions from Google's and Mozilla's official version feeds and rebuilds your agent from them. Your saved global agent is regenerated from the chosen profile, and rotation always uses the newest versions. Per-site rules that you typed by hand stay exactly as typed.</div>
+  <label>Your own User-Agent list <span class="hint">(optional)</span></label>
+  <input type="text" data-key="customListUrl" placeholder="https://raw.githubusercontent.com/you/repo/main/agents.txt">
+  <p class="mut">Link to any plain-text file (.txt) with one User-Agent per line — for example a raw GitHub file. Blank lines and lines starting with # are skipped, and quotes or trailing commas are tolerated. When set, it is re-fetched about hourly and agents are picked from it for the matching profile. Nothing is requested from it unless you enter a link.</p>
+  <div class="row"><button id="refreshVer" class="fit">Update versions now</button><span id="verInfo" class="mut"></span></div>
+  <p class="mut">Requests made (only these, about hourly): your own list link if you set one, Google's Chrome version feed and Mozilla's Firefox version feed. Order of preference: online list → version feeds → built-in estimates, so generation always works, even offline. Pasting your own text in the box above makes it a custom UA that is never changed.</p>
+</section>
+
+<section class="card"><h2>My custom User-Agents <span class="hint">(optional)</span></h2>
+  <textarea data-key="customUAs" id="customUAs" rows="5" spellcheck="false" placeholder="Work laptop | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36&#10;Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"></textarea>
+  <p class="mut">One per line, either <code>Label | User-Agent</code> or just the User-Agent. Printable ASCII only, 8–512 characters, up to 100. <span id="customInfo"></span></p>
+  <label class="chk"><input data-key="mixCustom" type="checkbox"><span>Include these in random rotation</span></label>
+  <p class="hint">When automatic rotation is set to a <b>Random</b> profile (any, desktop or mobile), it will sometimes pick one of your agents instead of a built-in one.</p>
+  <label>How often to pick one of mine</label>
+  <select data-key="customMixPercent" data-num>
+    <option value="10">About 1 in 10 rotations</option>
+    <option value="25">About 1 in 4 rotations</option>
+    <option value="50">About half of rotations</option>
+    <option value="75">About 3 in 4 rotations</option>
+    <option value="100">Always (only my agents)</option>
+  </select>
+  <p class="mut">Saved agents appear in the profile lists (global User-Agent, per-site rules, the popup) under <b>My custom agents</b>, and <b>Random — from my custom agents</b> becomes an option for automatic rotation. They are used exactly as typed and never changed or updated. Leave this blank to ignore the feature.</p>
+</section>
+
+<section class="card"><h2>Automatic rotation</h2>
+  <label class="chk"><input data-key="autoChange" type="checkbox"><span>Rotate the User-Agent automatically</span></label>
+  <label class="chk"><input data-key="autoSticky" type="checkbox"><span>Keep the same User-Agent while a site is open (recommended)</span></label>
+  <p class="hint">A site keeps the User-Agent it first saw until you close all its tabs, so pages don't break, log you out or ask for verification when a rotation happens mid-visit. Sites you open later get the newest one.</p>
+  <label>Profile</label><select data-key="autoProfile" id="autoProfile"></select>
+  <label>Change every (seconds, minimum 60)</label><input data-key="autoChangeSeconds" data-num type="number" min="60" step="1">
+  <p id="autoInfo" class="pill big off"></p>
+</section>
+
+<section class="card"><h2>Per-site rules</h2>
+  <p class="mut">A rule for <code>example.com</code> also covers its subdomains. The most specific rule wins and always beats the global/rotating UA.</p>
+  <div id="rules"></div>
+  <button id="add">Add site rule</button>
+</section>
+
+<section class="card"><h2>Deep stealth</h2>
+  <label class="chk"><input data-key="stealth" type="checkbox"><span>Hide Firefox's real engine when spoofing another browser</span></label>
+  <p class="mut">Removes Firefox-only APIs (<code>moz*</code>, <code>buildID</code>, <code>-moz-</code> CSS), adds Chromium-only ones (<code>window.chrome</code>, <code>deviceMemory</code>, <code>connection</code>, <code>getBattery</code>, <code>bluetooth</code>, V8-style <code>Error.stack</code>) and trims Firefox-specific request headers. Turn this off if a site breaks.</p>
+</section>
+
+<section class="card"><h2>Version overrides</h2>
+  <p class="mut">Offline, Chrome/Edge/Opera and Safari versions are estimated from release cadence. If a site rejects the estimate, type the real current major version here. Firefox profiles use your installed Firefox version automatically.</p>
+  <div class="row"><div><label>Chrome / Edge major</label><input data-key="chromeMajor" data-num type="number" min="1" placeholder="auto"></div><div><label>Safari major</label><input data-key="safariMajor" data-num type="number" min="1" placeholder="auto"></div></div>
+</section>
+</div>
+
+<!-- ======================= PRIVACY ======================= -->
+<div class="pane" id="pane-privacy" hidden>
+<section class="card"><h2>Privacy level</h2>
+  <label class="chk"><input data-key="privacyEnabled" type="checkbox"><span>Enable privacy features (master switch)</span></label>
+  <div class="row" style="justify-content:flex-start">
+    <button class="preset" data-preset="off">Off</button>
+    <button class="preset primary" data-preset="balanced">Balanced</button>
+    <button class="preset" data-preset="strict">Strict</button>
+    <span id="presetInfo" class="mut"></span>
+  </div>
+  <p class="mut"><b>Balanced</b>: DNT + Global Privacy Control, origin-only referrer, tracking-parameter stripping, WebRTC public-interface only, Firefox tracker blocking, no ping/prefetch.
+  <b>Strict</b>: adds a stricter referrer policy, canvas noise, WebGL masking, geolocation block, beacon block, WebRTC leak block and cookie partitioning. A preset only fills in the form — press <i>Save</i> to apply it.</p>
+  <label>Sites to skip (one per line — all privacy tweaks are skipped there; useful when a site breaks)</label>
+  <textarea data-key="privacyExempt" placeholder="bank.example.com"></textarea>
+</section>
+
+<section class="card"><h2>Request headers &amp; links</h2>
+  <label class="chk"><input data-key="hdrDNT" type="checkbox"><span>Send Do Not Track</span></label>
+  <p class="hint">Adds <code>DNT: 1</code> to requests. Few sites honour it.</p>
+  <label class="chk"><input data-key="upgradeHttps" type="checkbox"><span>Upgrade to HTTPS</span></label>
+  <p class="hint">Opens <code>http://</code> pages as <code>https://</code>. Local addresses and sites in “Sites to skip” are excluded. If a site stops loading, add it to that list.</p>
+  <label class="chk"><input data-key="hdrGPC" type="checkbox"><span>Send Global Privacy Control</span></label>
+  <p class="hint">Adds <code>Sec-GPC: 1</code>, a legally binding opt-out of data selling in several regions.</p>
+  <label>Referrer policy</label>
+  <select data-key="referrerMode">
+    <option value="default">Firefox default</option>
+    <option value="origin">Only the site address (https://site.com/)</option>
+    <option value="cross-origin-strip">Full URL to the same site, nothing to other sites</option>
+    <option value="none">Never send a referrer (may break some sites)</option>
+  </select>
+  <label class="chk"><input data-key="stripTracking" type="checkbox"><span>Clean links (remove tracking, skip redirect pages)</span></label>
+  <p class="hint">Removes tracking tags (<code>utm_*</code>, <code>fbclid</code>, <code>gclid</code>, YouTube <code>si=</code> and similar) from addresses you open, and skips click-logging / “You are leaving…” redirect pages (Google, Facebook, Instagram, YouTube, Steam, Reddit, LinkedIn, DuckDuckGo and more) so you land on the real page.</p>
+  <label>Extra parameters to strip <span class="hint">(space/comma separated, trailing <code>*</code> = prefix)</span></label>
+  <input data-key="stripExtra" type="text" placeholder="affiliate_id, ref_*">
+  <label>Language to report <span class="hint">(sets Accept-Language and navigator.languages; blank = your real languages)</span></label>
+  <input data-key="acceptLanguage" type="text" list="langs" placeholder="en-US,en;q=0.9">
+  <datalist id="langs">
+    <option value="en-US,en;q=0.9"><option value="en-GB,en;q=0.9"><option value="de-DE,de;q=0.9,en;q=0.8"><option value="fr-FR,fr;q=0.9,en;q=0.8">
+    <option value="es-ES,es;q=0.9,en;q=0.8"><option value="pt-BR,pt;q=0.9,en;q=0.8"><option value="ja-JP,ja;q=0.9,en;q=0.8"><option value="it-IT,it;q=0.9,en;q=0.8">
+  </datalist>
+</section>
+
+<section class="card"><h2>Audio <span class="hint">(fingerprint protection)</span></h2>
+  <label class="chk"><input data-key="audioNoise" type="checkbox"><span>Audio fingerprint noise</span></label>
+  <p class="hint">Adds tiny noise to Web Audio readbacks so audio can't be used to identify you.</p>
+</section>
+
+<section class="card"><h2>Fingerprint hardening <span class="hint">(page JavaScript)</span></h2>
+  <label class="chk"><input data-key="canvasNoise" type="checkbox"><span>Canvas fingerprint noise</span></label>
+  <p class="hint">Slightly changes canvas readbacks. Image editors and web games may notice.</p>
+  <label class="chk"><input data-key="geoBlock" type="checkbox"><span>Block geolocation requests</span></label>
+  <p class="hint">Location requests from pages always fail with “permission denied”.</p>
+  <label class="chk"><input data-key="geoFull" type="checkbox"><span>Block location fully</span></label>
+  <p class="hint">Also covers the Permissions API and all iframes, and sends <code>Permissions-Policy: geolocation=()</code>.</p>
+  <label class="chk"><input data-key="blockBeacon" type="checkbox"><span>Block sendBeacon</span></label>
+  <p class="hint">Stops <code>navigator.sendBeacon</code>, which analytics scripts use to ping as you leave a page.</p>
+  <p class="mut">These only change what pages can read from JavaScript. Web Workers keep Firefox's real values, and nothing here changes your real IP address (see the <b>IP &amp; Proxy</b> tab). Turn a feature off or add the site to the skip list if a site misbehaves (image editors and web games can notice canvas noise).</p>
+</section>
+
+<section class="card"><h2>Firefox privacy settings</h2>
+  <p class="mut">These change real Firefox preferences while Vivid User Privacy is installed. Turning them off or uninstalling the add-on restores your own settings.</p>
+  <label>WebRTC (can reveal your real IP even behind a proxy)</label>
+  <select data-key="webrtcMode">
+    <option value="default">Firefox default</option>
+    <option value="public-only">Hide local network addresses</option>
+    <option value="no-leak">Only use the proxy/default route — no direct UDP (recommended)</option>
+    <option value="off">Disable WebRTC completely (breaks video calls)</option>
+  </select>
+  <label>Cookies</label>
+  <select data-key="cookieMode">
+    <option value="default">Firefox default</option>
+    <option value="reject_trackers">Block cross-site tracking cookies</option>
+    <option value="reject_trackers_and_partition_foreign">Block trackers and partition other third-party cookies</option>
+    <option value="reject_third_party">Block all third-party cookies (may break logins/embeds)</option>
+  </select>
+  <label class="chk"><input data-key="trackingProtection" type="checkbox"><span>Firefox Tracking Protection</span></label>
+  <p class="hint">Keeps Firefox's built-in tracker blocking turned on.</p>
+  <label class="chk"><input data-key="blockPing" type="checkbox"><span>Block hyperlink auditing</span></label>
+  <p class="hint">Stops <code>&lt;a ping&gt;</code> from telling sites which links you click.</p>
+  <label class="chk"><input data-key="blockPrefetch" type="checkbox"><span>Disable prefetching</span></label>
+  <p class="hint">Turns off link and DNS prefetching, so Firefox doesn't contact sites you haven't opened.</p>
+  <details><summary>Advanced (can break sites)</summary>
+    <label class="chk"><input data-key="resistFingerprinting" type="checkbox"><span>Resist Fingerprinting</span></label>
+    <p class="hint">Firefox's own protection: UTC time zone, rounded timers and window size. Overrides several values set by this add-on.</p>
+    <label class="chk"><input data-key="firstPartyIsolate" type="checkbox"><span>First-Party Isolation</span></label>
+    <p class="hint">Keeps cookies and cache separate for each site. Can break logins that span sites.</p>
+  </details>
+</section>
+</div>
+
+<!-- ======================= SPOOFING ======================= -->
+<div class="pane" id="pane-spoof" hidden>
+<div class="note good">These settings change what <b>web pages can read</b> about your device. They follow the <b>Privacy</b> tab's master switch and its "sites to skip" list. Pick values that agree with each other (and with your User-Agent): a Windows User-Agent with an Apple GPU and macOS fonts is easier to spot than no spoofing at all.</div>
+
+<section class="card"><h2>Graphics card <span class="hint">(WebGL)</span></h2>
+  <select data-key="webglMode" id="webglMode">
+    <option value="off">Real GPU</option>
+    <option value="match">Match the spoofed User-Agent (recommended with UA spoofing)</option>
+    <option value="common">Common generic GPU (Intel UHD)</option>
+    <option value="preset">Pick a specific GPU…</option>
+    <option value="custom">Custom vendor / renderer…</option>
+  </select>
+  <div id="gpuPresetBox"><label>GPU</label><select data-key="gpuPreset" id="gpuPreset"></select></div>
+  <div id="gpuCustomBox" class="grid2">
+    <div><label>Unmasked vendor</label><input type="text" data-key="gpuVendor" placeholder="Google Inc. (NVIDIA)"></div>
+    <div><label>Unmasked renderer</label><input type="text" data-key="gpuRenderer" placeholder="ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 …)"></div>
+  </div>
+  <label class="chk"><input data-key="blockWebGPU" type="checkbox"><span>Hide WebGPU</span></label>
+  <p class="hint"><code>navigator.gpu</code> can report your real graphics card.</p>
+  <p class="mut">Changes <code>WEBGL_debug_renderer_info</code> and the WebGL vendor/renderer strings. Other WebGL details (texture limits, extensions) still come from your real GPU, and canvases inside Web Workers are not covered.</p>
+</section>
+
+<section class="card"><h2>Screen</h2>
+  <div class="grid2">
+    <div><label>Screen size to report</label>
+      <input type="text" data-key="screenSize" list="screenSizes" placeholder="real screen — e.g. 1920x1080">
+      <datalist id="screenSizes"><option value="1920x1080"><option value="1366x768"><option value="1536x864"><option value="1440x900"><option value="1280x720">
+        <option value="2560x1440"><option value="3840x2160"><option value="390x844"><option value="412x915"></datalist></div>
+    <div><label>Device pixel ratio</label>
+      <input type="text" data-key="screenDPR" data-num list="dprs" placeholder="real value — e.g. 1, 1.25, 2"><datalist id="dprs"><option value="1"><option value="1.25"><option value="1.5"><option value="2"><option value="3"></datalist></div>
+    <div><label>Colour depth</label>
+      <select data-key="screenDepth"><option value="">Real / 24</option><option value="24">24-bit</option><option value="30">30-bit</option><option value="32">32-bit</option></select></div>
+  </div>
+  <label class="chk"><input data-key="screenWindow" type="checkbox"><span>Match window size to fake screen</span></label>
+  <p class="hint">Also fakes <code>innerWidth</code>, <code>outerHeight</code>, <code>screenX</code> … as a maximised window on that screen.</p>
+  <p class="mut">The window option makes the numbers consistent, but pages that size things from <code>innerWidth</code> in JavaScript will see a fixed value (CSS layout is unaffected). Leave it off if a site looks wrong.</p>
+</section>
+
+<section class="card"><h2>Fonts</h2>
+  <select data-key="fontMode">
+    <option value="off">Real fonts</option>
+    <option value="match">Look like the spoofed OS (hide fonts that OS does not ship)</option>
+    <option value="common">Only a small set of common fonts</option>
+    <option value="custom">Only the fonts in my list</option>
+  </select>
+  <label>Fonts to keep visible <span class="hint">(optional — one per line; in "my list" mode this is the whole list)</span></label>
+  <textarea data-key="fontList" rows="3" placeholder="Arial&#10;Segoe UI"></textarea>
+  <p class="mut">Fonts that fingerprinting scripts probe for (about 300 names) and that are not in the chosen set are made to look <i>not installed</i>: pages that ask for them get the fallback font instead. This <b>hides</b> fonts; it cannot make a font appear that your computer does not have, so "match" works best when your real OS is close to the spoofed one. Web fonts that sites load themselves are unaffected. Fonts you rely on in a web app can be added to the list or the site added to the Privacy tab's skip list.</p>
+</section>
+
+<section class="card"><h2>Time zone</h2>
+  <select data-key="tzMode" id="tzMode"><option value="off">Real time zone</option><option value="utc">UTC</option><option value="custom">Custom…</option></select>
+  <div id="tzBox"><label>IANA time zone</label><input type="text" data-key="tzName" list="tzNames" placeholder="Europe/Berlin"><datalist id="tzNames"></datalist></div>
+  <p class="mut">Changes <code>getTimezoneOffset</code>, <code>getHours()</code> and friends, <code>Date#toString</code>, <code>toLocale*String</code> and <code>Intl.DateTimeFormat</code>. It does not change how <code>new Date(2024, 0, 1)</code> or <code>Date.parse("2024-01-01 10:00")</code> read their input, and your <b>IP address</b> still points at your real location — use the IP &amp; Proxy tab and pick a matching zone. Language is set in the Privacy tab.</p>
+</section>
+
+<section class="card"><h2>Hardware &amp; devices</h2>
+  <div class="grid2">
+    <div><label>CPU core count to report</label><input data-key="hwConcurrency" data-num type="number" min="1" max="64" placeholder="real value"></div>
+    <div><label>Device memory to report (GB)</label>
+      <select data-key="deviceMemory"><option value="">Real / not reported</option><option>0.5</option><option>1</option><option>2</option><option>4</option><option>8</option></select></div>
+  </div>
+  <label class="chk"><input data-key="hideMediaDevices" type="checkbox"><span>Hide cameras and microphones</span></label>
+  <p class="hint"><code>enumerateDevices()</code> returns an empty list, since the list is a fingerprint. Video calls may stop finding your devices.</p>
+  <label class="chk"><input data-key="hideVoices" type="checkbox"><span>Hide text-to-speech voices</span></label>
+  <p class="hint"><code>speechSynthesis.getVoices()</code> returns an empty list.</p>
+  <p class="mut">Canvas, audio and battery protection are in the Privacy tab (Audio, Fingerprint hardening, and "blend in" values).</p>
+</section>
+
+<section class="card"><h2>More spoofing</h2>
+  <label class="chk"><input data-key="hideBattery" type="checkbox"><span>Hide battery status</span></label>
+  <p class="hint">Removes <code>navigator.getBattery()</code>. Level and charging state can identify you for short periods.</p>
+  <label class="chk"><input data-key="hideConnection" type="checkbox"><span>Hide network information</span></label>
+  <p class="hint">Removes <code>navigator.connection</code> (connection type and speed estimate).</p>
+  <label class="chk"><input data-key="hideGamepads" type="checkbox"><span>Hide gamepads</span></label>
+  <p class="hint"><code>navigator.getGamepads()</code> returns an empty list. Browser games won't see your controller.</p>
+  <label class="chk"><input data-key="preferLight" type="checkbox"><span>Always report light theme</span></label>
+  <p class="hint">Simple <code>prefers-color-scheme</code> and <code>prefers-reduced-motion</code> checks answer as light theme and no reduced motion. Sites may still look dark if their CSS follows your real setting.</p>
+  <label class="chk"><input data-key="hideA11y" type="checkbox"><span>Hide accessibility settings</span></label>
+  <p class="hint">Simple <code>matchMedia()</code> checks for forced colours (high contrast), <code>prefers-contrast</code>, inverted colours, reduced transparency and reduced data answer as “not set”. These reveal assistive-technology use and make your browser rarer. CSS <code>@media</code> rules in a page's stylesheet still follow your real setting.</p>
+  <label class="chk"><input data-key="matchOrientation" type="checkbox"><span>Match screen orientation to the claimed device</span></label>
+  <p class="hint"><code>screen.orientation</code> reports landscape for a desktop User-Agent and portrait for a phone or tablet one, so it agrees with the device you claim. <code>matchMedia("(orientation: …)")</code> and CSS still use your real window.</p>
+  <label class="chk"><input data-key="fakeMediaCaps" type="checkbox"><span>Hide hardware video decoding info</span></label>
+  <p class="hint"><code>navigator.mediaCapabilities</code> keeps saying whether a format is supported, but always answers “smooth, not power-efficient”, so hardware acceleration (which depends on your GPU) is not revealed. Video sites may pick a different quality or codec.</p>
+  <label>Web Workers</label>
+  <select data-key="workerMode">
+    <option value="match">Match the claimed browser (default)</option>
+    <option value="real">Leave workers alone</option>
+    <option value="block">Block workers</option>
+  </select>
+  <p class="hint"><b>Match:</b> scripts inside a Web Worker report the same User-Agent as the page (applies when a non-Firefox identity and deep stealth are on). <b>Leave alone:</b> workers see your real browser, which can contradict the page. <b>Block:</b> <code>Worker</code> and <code>SharedWorker</code> throw an error, so workers cannot fingerprint you, but many sites (maps, editors, video, chat) will break.</p>
+  <label class="chk"><input data-key="crossTabProtect" type="checkbox"><span>Cross-tab identity leak protection</span></label>
+  <p class="hint">Stops tabs from linking you across sites. Every tab of a site keeps the same User-Agent (even if automatic rotation's “keep the same User-Agent” option is off), and a page opened from another site starts with an empty <code>window.name</code> and no <code>window.opener</code> link back to that site. A few sign-in pop-ups that talk to the page that opened them may stop working; add that site to the “sites to skip” list if so.</p>
+  <label class="chk"><input data-key="coarseTimers" type="checkbox"><span>Reduce timer precision</span></label>
+  <p class="hint">Rounds <code>performance.now()</code> to 100 ms to blunt timing attacks. Games, animations and benchmarks may stutter.</p>
+  <label class="chk"><input data-key="fakeStorage" type="checkbox"><span>Fake storage quota</span></label>
+  <p class="hint"><code>navigator.storage.estimate()</code> reports 10 GB available and nothing used, hiding your real disk size.</p>
+</section>
+</div>
+
+<!-- ======================= IP & PROXY ======================= -->
+<div class="pane" id="pane-ip" hidden>
+<section class="card"><h2>Hide your IP address</h2>
+  <div class="note"><b>How this works.</b> A browser add-on cannot hide your IP by itself — your traffic has to leave through someone else's server. Vivid User Privacy routes Firefox through a <b>proxy you choose</b> and plugs the usual leaks (DNS, WebRTC). It does not provide a proxy.</div>
+  <div class="note good"><b>Free options that are actually safe:</b>
+    <ul style="margin:6px 0 0 18px;padding:0">
+      <li><b>Tor</b> — install Tor Browser (or the <code>tor</code> service) and leave it running, then add the <i>Tor</i> entry below. Free, no account. Slower, and some sites block Tor.</li>
+      <li><b>Your own server</b> — <code>ssh -D 1080 user@your-server</code> gives you a free SOCKS5 proxy at <code>127.0.0.1:1080</code> (cloud free tiers work).</li>
+      <li>Any proxy/VPN SOCKS5 or HTTP endpoint you already have access to.</li>
+    </ul></div>
+  <div class="note warn"><b>Avoid random "free proxy lists".</b> Whoever runs a free public proxy can see — and alter — your unencrypted traffic and often logs it. If you use one, assume nothing sensitive (logins, banking) is safe on it.</div>
+
+  <label class="chk"><input data-key="proxyEnabled" type="checkbox"><span>Route traffic through the selected proxy</span></label>
+
+  <h2 style="margin-top:14px">Proxies</h2>
+  <div id="proxies"></div>
+  <div class="row" style="justify-content:flex-start;flex-wrap:wrap">
+    <button id="addTorBrowser" class="fit">+ Tor Browser (9150)</button>
+    <button id="addTorService" class="fit">+ Tor service (9050)</button>
+    <button id="addSSH" class="fit">+ SSH tunnel (1080)</button>
+    <button id="addProxy" class="fit">+ Custom proxy</button>
+  </div>
+  <p class="mut">The round button picks the proxy used when rotation is <i>off</i>. "Separate circuit per site" (Tor) uses a different Tor circuit — and exit IP — for each website you visit. "Test" saves your settings first.</p>
+</section>
+
+<section class="card"><h2>Routing</h2>
+  <div class="grid2">
+    <div><label>What goes through the proxy</label>
+      <select data-key="proxyScope"><option value="all">All sites (except the bypass list)</option><option value="listed">Only the sites listed below</option></select></div>
+    <div><label>Rotation (needs 2+ proxies)</label>
+      <select data-key="proxyRotation"><option value="off">Off — use the selected proxy</option><option value="timed">Switch to a random proxy every N seconds</option><option value="per-site">A fixed proxy per website</option></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Only proxy these sites (when "listed" is chosen)</label><textarea data-key="proxySites" placeholder="example.com"></textarea></div>
+    <div><label>Never proxy these sites (always direct)</label><textarea data-key="proxyBypass" placeholder="intranet.corp.example"></textarea></div>
+  </div>
+  <div class="grid2">
+    <div><label>Rotate every (seconds, min 30)</label><input data-key="proxyRotateSeconds" data-num type="number" min="30" step="1"></div>
+    <div><label class="chk" style="margin-top:28px"><input data-key="proxyRotateUA" type="checkbox"> Also change the User-Agent when the proxy rotates</label></div>
+  </div>
+  <p class="mut">Local addresses (localhost, 192.168.x.x, 10.x.x.x, *.local …) always bypass the proxy.</p>
+</section>
+
+<section class="card"><h2>Leak protection</h2>
+  <label class="chk"><input data-key="proxyDNS" type="checkbox"><span>Resolve DNS through the proxy</span></label>
+  <p class="hint">SOCKS proxies only. Stops DNS leaks.</p>
+  <label class="chk"><input data-key="proxyForceWebRTC" type="checkbox"><span>Block WebRTC IP leaks</span></label>
+  <p class="hint">Active while the proxy is on.</p>
+  <label class="chk"><input data-key="proxyKillSwitch" type="checkbox"><span>Kill switch</span></label>
+  <p class="hint">If the proxy fails, proxied traffic pauses for 10 s instead of risking a direct connection.</p>
+  <div class="note"><b>Check it.</b> Always verify, especially after changing settings. Also, Firefox only lets an add-on handle <i>private windows</i> if you enable <i>Run in Private Windows</i> for Vivid User Privacy in <code>about:addons</code> — otherwise private-window traffic is <b>not</b> proxied.</div>
+  <div class="row" style="justify-content:flex-start;flex-wrap:wrap">
+    <button id="checkReal" class="fit">Show IP seen by sites (current routing)</button>
+    <button id="checkWebRTC" class="fit">WebRTC leak test</button>
+    <button id="rotateProxyNow" class="fit">Switch proxy now</button>
+  </div>
+  <p id="ipOut" class="result"></p>
+  <label>IP check service <span class="hint">(contacted only when you press a check button)</span></label>
+  <input data-key="ipCheckUrl" type="text">
+</section>
+</div>
+
+<!-- ======================= BROWSER CHECK ======================= -->
+<div class="pane" id="pane-check" hidden>
+<section class="card"><h2>Your real browser</h2>
+  <div class="result" id="realSummary">detecting…</div>
+  <div class="mut" id="realDetails"></div>
+  <div class="mono" id="realUA" style="margin-top:6px"></div>
+  <p class="mut">Read from Firefox itself (not from a web page), so this is always the truth, whatever Vivid User Privacy is sending to sites.</p>
+</section>
+<section class="card"><h2>What do websites detect?</h2>
+  <p class="mut">Runs the same checks a site's "true browser" script would run — User-Agent, platform, Client Hints, Firefox-only features, error-stack format, Web Workers — and tells you which ones still reveal your real browser.</p>
+  <div class="row"><button id="checkRecent" class="primary">Check my most recent web tab</button><button id="checkExample">Open example.com in a background tab and check</button></div>
+  <div id="checkOut"></div>
+</section>
+</div>
+
+<!-- ======================= BACKUP ======================= -->
+<div class="pane" id="pane-backup" hidden>
+<section class="card"><h2>Backup</h2>
+  <div class="row"><button id="export">Export settings</button><button id="import">Import settings…</button></div>
+  <input id="file" type="file" accept="application/json" hidden>
+  <p class="mut">Exported files do <b>not</b> include proxy passwords. Proxy credentials are stored unencrypted in Firefox's local extension storage.</p>
+</section>
+</div>
+
+<div class="row sticky" style="justify-content:flex-start"><button id="save" class="primary fit">Save settings</button><button id="reset" class="danger fit">Reset everything</button><span id="status" class="mut"></span></div>
+<script src="ua-lib.js"></script><script src="options.js"></script></body></html>

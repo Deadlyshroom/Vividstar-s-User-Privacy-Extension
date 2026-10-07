@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+  "name": "Vivid User Privacy",
+  "version": "1.0.5",
+  "description": "User-Agent switcher with presets, per-site rules and rotation, plus privacy hardening (headers, fingerprinting, WebRTC, trackers) and optional proxy/Tor routing to hide your IP.",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "proxy",
+    "privacy",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "ua-lib.js",
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_title": "Vivid User Privacy",
+    "default_popup": "popup.html",
+    "default_icon": "icon.svg"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ua-forge@example.local",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  }
+}
