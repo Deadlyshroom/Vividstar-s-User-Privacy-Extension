@@ -1,4 +1,4 @@
-# Vivid User Privacy for Firefox (v3)
+# Vivid User Privacy for Firefox (v1.0.5)
 
 ## Web Workers option (Settings → Spoofing → More spoofing)
 - **Web Workers:** *Match the claimed browser* (default, unchanged), *Leave workers alone*, or *Block workers* (`Worker` / `SharedWorker` throw; many sites will break).
@@ -8,17 +8,8 @@
 - **No window links between sites:** a top-level page opened from or reached from another site gets an empty `window.name`, and `window.opener` is set to `null` when the opener is a different site. Follows the Privacy master switch and the "sites to skip" list.
 - Limit: some pop-up sign-in flows need `window.opener`; add the site to "sites to skip" if one breaks.
 
-## v1.0.15 — Two more spoofing options (Settings → Spoofing → More spoofing, both off by default)
-- **Match screen orientation to the claimed device:** `screen.orientation.type` / `angle` report landscape for a desktop User-Agent and portrait for a mobile one. CSS and `matchMedia("(orientation: …)")` still use the real window.
-- **Hide hardware video decoding info:** `navigator.mediaCapabilities.decodingInfo()` / `encodingInfo()` keep the real "supported" answer but always report smooth and not power-efficient, so hardware acceleration does not reveal your GPU. Video sites may choose a different quality or codec.
 
-## v1.0.14 — Hide accessibility settings (Settings → Spoofing → More spoofing, off by default)
-- Simple `matchMedia()` checks for `forced-colors` (Windows high contrast), `prefers-contrast`, `inverted-colors`, `prefers-reduced-transparency` and `prefers-reduced-data` answer as "not set". These settings can reveal assistive-technology use and are rare enough to help identify a browser. Follows the Privacy master switch and the "sites to skip" list.
-- Limit: only what JavaScript reads is changed; CSS `@media` rules inside a site's stylesheet still follow your real setting, and compound queries (`and`, commas, `not`) are left alone.
 
-## v1.0.7 — Random User-Agent by default
-- A fresh install starts with **automatic rotation on** (profile: random — any browser/device, new User-Agent every hour) until you choose your own. Applying a User-Agent yourself or pressing *Stop rotation* / *Turn off* turns it off; *Reset all* returns to the default (rotation on). Saved settings are never overwritten.
-- **Clear status:** the popup opens with a green “Auto rotation: ON” or red “Auto rotation: OFF” banner (current agent, interval, one-click Turn on/off); the toolbar badge is green for AUTO; Settings shows a matching pill.
 
 - **Clean links** (Privacy tab and popup): one setting that removes tracking tags (`utm_*`, `fbclid`, `gclid`, `si=` …) from addresses you open and skips click-logging / "you are leaving this site" redirect pages (Google, Facebook, Instagram, YouTube, Steam, Reddit, LinkedIn, Slack, VK, DuckDuckGo, Outlook Safe Links, Tumblr). Replaces the former separate "Skip tracking redirects" and "Strip tracking parameters" options.
 
@@ -30,70 +21,15 @@
 - The page-side script is swapped without a gap, so no page load is missed during a rotation.
 - Fresh installs now rotate between **desktop** browsers only (mobile layouts broke many sites). Existing settings are unchanged.
 
-## v1.0.10 — Fix: lag and freezes with automatic rotation
-- Request headers: the User-Agent is parsed once and reused instead of on every request.
-- A rotation tick now only updates the injected User-Agent and the badge instead of rebuilding everything; version-feed refreshes no longer rotate twice.
-- Rotation interval minimum is 60 seconds (was 10).
-
-## v1.0.9 — My custom agents in random rotation
-- Settings → User-Agent → My custom User-Agents: **Include these in random rotation** (on by default) plus how often one of yours is picked (1 in 10 … always). Works with Random — any / desktop / mobile; your agents are used exactly as typed.
-
-## v1.0.8 — Auto rotation is obvious
-- Fresh installs start with a random User-Agent (any browser/device, new one every hour) until you pick your own: applying a User-Agent turns rotation off, and you can turn it back on at any time.
-- Bigger, clearer on/off banner in the popup and a larger on/off status in Settings → User-Agent → Automatic rotation (no new buttons).
-- Toolbar badge: green **AUTO** (rotating), amber **SET** (the User-Agent you chose), red **OFF** (real Firefox User-Agent).
-
-## v1.0.6 — More spoofing (Settings → Spoofing → More spoofing, all off by default)
-- Hide battery status, hide network information, hide gamepads.
-- Always report light theme and no reduced motion (simple media queries only).
-- Reduce timer precision (`performance.now()` rounded to 100 ms).
-- Fake storage quota (`navigator.storage.estimate()` reports 10 GB, 0 used).
 
 ## v1.0.4
 - **Block geolocation requests** is now on by default (together with *Block location fully*). Existing installs keep whatever they saved.
 - **Upgrade to HTTPS** (Privacy tab, off by default): `http://` pages open as `https://`; local/IP addresses and your skip list are excluded.
 
 
-## v3.6 — Spoofing tab + your own User-Agents
-- **New Settings → Spoofing tab** (follows the Privacy master switch and "sites to skip" list):
-  - **GPU:** pick a specific card from a list of real WebGL strings (NVIDIA / AMD / Intel / Apple / Adreno / Mali), or type your own unmasked vendor and renderer. Optional **hide WebGPU**.
-  - **Screen:** any `WxH`, device pixel ratio, colour depth, and optionally matching `innerWidth` / `outerHeight` / `screenX` … values.
-  - **Fonts:** fonts that fingerprinting scripts probe for (~300 names) are made to look *not installed*, either to match the spoofed OS, a small common set, or only your own list. Uses an extension-injected stylesheet, so a page's CSP cannot block it. It can hide fonts, not add ones you do not have.
-  - **Time zone:** UTC or any IANA zone (`Europe/Berlin`): offset, `getHours()` etc., `Date#toString`, `toLocale*String`, `Intl.DateTimeFormat`.
-  - **Hardware & devices:** CPU cores, `deviceMemory`, hide `enumerateDevices()`, hide speech voices.
-- **My custom User-Agents** (Settings → User-Agent, optional): one per line as `Label | User-Agent` or just the string. They show up in the profile lists (global, per-site rules, popup) and as **Random — from my custom agents** for rotation. Used exactly as typed; only printable ASCII is accepted because the value goes into an HTTP header.
-- Not changed: language and Do Not Track stay in the Privacy tab. Limits: `new Date(y, m, d)` / `Date.parse` still read input in the real zone; worker and OffscreenCanvas contexts keep real GPU values.
 
-## v3.5 — Online User-Agent list (optional)
-- **Settings → User-Agent → "Your own User-Agent list"** (optional, blank by default). Paste an https link to any plain-text file with one User-Agent per line (e.g. a raw GitHub file); it is re-fetched about hourly and nothing is requested from it unless you set a link.
-- **Never stale, never broken.** Order: online list → Google/Mozilla version feeds → built-in estimates. A list that is empty, malformed or out of date is ignored and the next source takes over, so generating always works, offline included.
-- "Update versions now" refreshes everything and shows exactly what is in use and any error.
 
-## v3.4 — Settings stick + always-current User-Agents
-- **Fix: choices no longer reset.** The popup used to start from a fresh profile and a newly generated UA every time it opened. It now remembers your profile, keeps unsaved text (per site) until you apply it, and saves rotation profile/interval the moment you change them. Settings page remembers its profile too.
-- **Live versions.** Newest stable Chrome and Firefox (and Firefox ESR) versions are looked up from Google's and Mozilla's version feeds at startup and every few hours (Settings → User-Agent → *Update versions now*). Falls back to built-in estimates if offline or if you turn the lookup off. Manual Chrome/Safari overrides still win.
-- **Stays current.** "Apply to all sites" with a generated UA is re-generated automatically when versions change (*Keep this User-Agent up to date*). Rotation always produces fresh UAs. Custom text is never touched.
-- **28 profiles** (was 18): ChromeOS, Edge Linux, Firefox ESR, Opera macOS/Linux, Android tablet, Edge & Samsung Internet on Android, Firefox & Edge on iPhone.
-- Safari/iOS versions and Samsung Internet are estimated from release cadence (no public feed).
-
-## v3.3 — True browser detection
-- **Your real browser, detected for real.** Read from Firefox itself (`getBrowserInfo`, `getPlatformInfo`, unspoofed extension-page UA): exact version, release channel (Nightly / Developer Edition / Beta / Release-ESR), build ID, OS and CPU, and Firefox-based forks (Tor Browser, Mullvad, LibreWolf, Waterfox, Floorp, Zen, …). Shown at the top of the popup and in Settings → **Browser check**. It also notices when *Resist Fingerprinting* is already on (it overrides some spoofed values).
-- **"What do sites detect?" self-test.** Runs a site-style "true browser" probe on a tab (popup button, or Settings → Browser check, which can also open example.com in a background tab) and reports ✓ / ✗ per check: JS vs HTTP User-Agent, `navigator.platform`/`vendor`, Client Hints, Firefox/Gecko giveaways (`InstallTrigger`, `-moz-` CSS, `buildID`, `Error.fileName`, stack format…), Chromium-only features, native-looking `toString`, and Web Worker consistency. Ends with a verdict: *Convincing / Mostly convincing / Detectable*.
-- **Matches your own OS.** The popup now starts from the Chrome profile for the OS you are really on, and warns when a UA claims a different OS or device type (fonts, GPU and screen would contradict it).
-- **Fix: blob workers leaked your real UA.** `new Worker(URL.createObjectURL(...))` bypassed the Worker coverage; blob: workers are now covered too (their source is read immediately, so sites that revoke the blob URL still work).
-
-## v3.2 — Block location fully
-Privacy → Fingerprint hardening → **Block location fully** (also part of *Strict*). Geolocation calls always fail with "permission denied", `permissions.query({name:'geolocation'})` reports `denied`, and a `Permissions-Policy: geolocation=()` header makes Firefox itself refuse it for the page and every iframe. For belt-and-braces also set `geo.enabled` = false in `about:config`.
-Not covered: location inferred from your **IP address** (use the proxy/Tor feature) and timezone/language hints.
-
-## What's new in v3.1 (engine hiding)
-- Spoofed functions now report `[native code]` from `Function.prototype.toString`
-- Web Workers / SharedWorkers (classic) get the same `navigator` values, closing the biggest Firefox leak
-- Chromium-style `Accept` headers for images and stylesheets
-- Extra Chromium-only APIs: `performance.memory`, `webkitRequestFileSystem`, `webkitGetUserMedia`
-- Still not hideable from an extension: TLS/JA3 and HTTP/2 fingerprints, header order, font rendering, module workers
-
-## What's new in v3
+## What's new in v1.0.5
 - **Privacy tab** — one-click *Balanced* / *Strict* levels, plus individual controls:
   - request headers: `DNT`, `Sec-GPC` (Global Privacy Control), referrer policy (site-address only / same-site only / none), reported language (`Accept-Language` + `navigator.languages`)
   - strip tracking parameters (`utm_*`, `fbclid`, `gclid`, `msclkid`, … plus your own list) from visited links
