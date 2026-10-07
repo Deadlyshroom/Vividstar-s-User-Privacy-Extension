@@ -61,12 +61,6 @@ Avoid public "free proxy lists": the operator can read and modify unencrypted tr
 - The kill switch is best-effort: after the proxy fails it blocks proxied traffic for 10 s at a time. Verify with the IP check rather than assuming.
 - Proxy credentials are saved unencrypted in the extension's local storage; exports never include passwords.
 
-## User-Agent features (unchanged)
-- 18 profiles: Chrome / Edge / Firefox / Safari / Opera on Windows, macOS, Linux; Android & iOS/iPad browsers; Googlebot, Bingbot
-- Custom User-Agent, per-site rules (subdomains covered, most specific wins), "Firefox default" per site
-- Automatic rotation (10 s – 24 h) over one profile, or random desktop / mobile / any
-- Consistent spoofing: HTTP `User-Agent` **and** `navigator.userAgent`, `appVersion`, `platform`, `vendor`, `oscpu`, `maxTouchPoints`, `userAgentData`, plus `Sec-CH-UA*` headers for Chromium UAs
-- Deep stealth (hide Firefox-only APIs, add Chromium-only ones)
 
 ## Install (temporary)
 `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** → select `manifest.json`.
