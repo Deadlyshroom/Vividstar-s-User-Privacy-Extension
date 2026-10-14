@@ -52,11 +52,7 @@ Privacy tweaks apply everywhere except the "skip" list. Proxy: never-proxy list 
 - Deep stealth cannot make Firefox byte-identical to Chrome (TLS/HTTP2 fingerprints, fonts, engine-evaluated CSS, etc. remain).
 - Firefox blocks extensions on some pages (about:*, addons.mozilla.org, etc.).
 
--
--
--
--
-  **--Bug fixes Completed---**
+## 
 ## Fix: endless "Verify you are human" loop
 - A bot check compares the claimed browser with the real engine, so a Chrome/Safari identity on Firefox loops forever. When a site shows the check, the tab is reloaded once and from then on that site gets a Firefox identity (User-Agent switching stays on, same engine so it passes) and no fingerprint tweaks. The check's own frames are never touched. It only reads response headers; it does not contact any Cloudflare service. Other sites are unaffected.
 
@@ -64,3 +60,4 @@ Privacy tweaks apply everywhere except the "skip" list. Proxy: never-proxy list 
 - **Keep the same User-Agent while a site is open** (Settings → Automatic rotation, on by default). Before, a rotation changed the User-Agent in request headers immediately but not in the JavaScript of pages that were already open, so sites saw two different browsers and broke, logged you out or asked for verification. Now each site keeps the User-Agent it first saw until all its tabs are closed (or you change rotation settings); sites you open afterwards get the newest one.
 - The page-side script is swapped without a gap, so no page load is missed during a rotation.
 - Fresh installs now rotate between **desktop** browsers only (mobile layouts broke many sites). Existing settings are unchanged.
+  **--Bug fixes Completed---**
