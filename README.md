@@ -52,7 +52,11 @@ Privacy tweaks apply everywhere except the "skip" list. Proxy: never-proxy list 
 - Deep stealth cannot make Firefox byte-identical to Chrome (TLS/HTTP2 fingerprints, fonts, engine-evaluated CSS, etc. remain).
 - Firefox blocks extensions on some pages (about:*, addons.mozilla.org, etc.).
 
-- **--Bug fixes Completed---**
+-
+-
+-
+-
+  **--Bug fixes Completed---**
 ## Fix: endless "Verify you are human" loop
 - A bot check compares the claimed browser with the real engine, so a Chrome/Safari identity on Firefox loops forever. When a site shows the check, the tab is reloaded once and from then on that site gets a Firefox identity (User-Agent switching stays on, same engine so it passes) and no fingerprint tweaks. The check's own frames are never touched. It only reads response headers; it does not contact any Cloudflare service. Other sites are unaffected.
 
