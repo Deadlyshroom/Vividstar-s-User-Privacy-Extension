@@ -15,7 +15,6 @@
   - **Check my IP** and **WebRTC leak test** buttons
   - HTTP proxy username/password support
 - Popup gets Privacy and "Hide my IP" cards. Badge shows `PRX` / `ON+P` / `A+P` when a proxy is active.
-- ## 
 ## Fix: endless "Verify you are human" loop
 - A bot check compares the claimed browser with the real engine, so a Chrome/Safari identity on Firefox loops forever. When a site shows the check, the tab is reloaded once and from then on that site gets a Firefox identity (User-Agent switching stays on, same engine so it passes) and no fingerprint tweaks. The check's own frames are never touched. It only reads response headers; it does not contact any Cloudflare service. Other sites are unaffected.
 
