@@ -15,7 +15,16 @@
   - **Check my IP** and **WebRTC leak test** buttons
   - HTTP proxy username/password support
 - Popup gets Privacy and "Hide my IP" cards. Badge shows `PRX` / `ON+P` / `A+P` when a proxy is active.
-- 
+- ## 
+## Fix: endless "Verify you are human" loop
+- A bot check compares the claimed browser with the real engine, so a Chrome/Safari identity on Firefox loops forever. When a site shows the check, the tab is reloaded once and from then on that site gets a Firefox identity (User-Agent switching stays on, same engine so it passes) and no fingerprint tweaks. The check's own frames are never touched. It only reads response headers; it does not contact any Cloudflare service. Other sites are unaffected.
+
+## Fix: automatic rotation no longer breaks sites
+- **Keep the same User-Agent while a site is open** (Settings → Automatic rotation, on by default). Before, a rotation changed the User-Agent in request headers immediately but not in the JavaScript of pages that were already open, so sites saw two different browsers and broke, logged you out or asked for verification. Now each site keeps the User-Agent it first saw until all its tabs are closed (or you change rotation settings); sites you open afterwards get the newest one.
+- The page-side script is swapped without a gap, so no page load is missed during a rotation.
+- Fresh installs now rotate between **desktop** browsers only (mobile layouts broke many sites). Existing settings are unchanged.
+
+
 
 ## About hiding your IP "for free"
 A browser extension cannot hide your IP on its own; your traffic has to leave through another machine. Vivid User Privacy does the routing and leak-proofing, but you must supply the exit point. Free options that are actually trustworthy:
