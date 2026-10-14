@@ -60,4 +60,4 @@ Privacy tweaks apply everywhere except the "skip" list. Proxy: never-proxy list 
 - **Keep the same User-Agent while a site is open** (Settings → Automatic rotation, on by default). Before, a rotation changed the User-Agent in request headers immediately but not in the JavaScript of pages that were already open, so sites saw two different browsers and broke, logged you out or asked for verification. Now each site keeps the User-Agent it first saw until all its tabs are closed (or you change rotation settings); sites you open afterwards get the newest one.
 - The page-side script is swapped without a gap, so no page load is missed during a rotation.
 - Fresh installs now rotate between **desktop** browsers only (mobile layouts broke many sites). Existing settings are unchanged.
-  **--Bug fixes Completed---**
+
